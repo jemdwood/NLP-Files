@@ -1,9 +1,12 @@
 
-#Class built to rate the likelihood of different translations of the same sentence, 
+# Class built to rate the likelihood of different translations of the same sentence, 
 # where the sentence under question is formatted as a list of word indices in the sentence
 # and at each indice there is a sub-array containing the various possible words at that position.
 # The model is built to find the likelihood of various configurations of that sentence. However,
 # it can also be used simply to look at the probability of a single fully-formed sentence.
+# 
+# Example: there is an example usage of this class at the bottom of the file. To see example output, 
+# just run this file as its own program.
 #
 # This model uses bigrams sourced from the Corpus of Contemporary American English
 
