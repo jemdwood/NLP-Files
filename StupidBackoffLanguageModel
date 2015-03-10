@@ -1,0 +1,64 @@
+import math, collections, sys
+UNK= "UNK"
+class StupidBackoffLanguageModel:
+
+  def __init__(self, corpus):
+    """Initialize your data structures in the constructor."""
+    self.bigramCounts = collections.defaultdict(lambda: collections.defaultdict(lambda: 0))
+    self.total = 0 
+    self.vocabSize = 0
+    self.train(corpus)
+    UNK = "UNK"
+
+  def train(self, corpus):
+    """ Takes a corpus and trains your language model. 
+        Compute any counts or other corpus statistics in this function.
+    """  
+    for sentence in corpus.corpus:
+      last_token = "<s>"
+      self.total +=1
+      try:
+        assert(sentence.data[0].word == "<s>")
+      except AssertionError:
+        print("Error; please add a start token to the beginning of each sentence")
+        quit()
+      
+      for datum in sentence.data[1:]: #skips start token of sentence  
+        token = datum.word
+        self.bigramCounts[last_token][token] = self.bigramCounts[last_token][token] + 1
+        self.total += 1
+        last_token = token
+      self.bigramCounts["</s>"]["!<PLACEHOLDER>!"] +=1 #so that when calculating unigram costs, can get correct value
+
+    self.bigramCounts[UNK] = collections.defaultdict(lambda: 0)
+    
+    self.vocabSize = len(self.bigramCounts.keys())
+
+  def score(self, sentence):
+    """ Takes a list of strings as argument and returns the log-probability of the 
+        sentence using your language model. Use whatever data you computed in train() here.
+    """
+    try:
+        assert(sentence[0] == "<s>")
+    except AssertionError:
+        print("Error; please add a start token to the beginning of each sentence")
+        quit()
+
+    score = 0.0 
+    last_token = sentence[0]
+
+    for token in sentence[1:]: #ignores start token
+      if token not in self.bigramCounts: token = UNK
+      last_uni_count = sum(self.bigramCounts[last_token].values())
+      uni_count = sum(self.bigramCounts[token].values())
+      bi_count = self.bigramCounts[last_token][token] 
+      
+      if bi_count > 0:
+        score += math.log(bi_count)
+        score -= math.log(last_uni_count)
+      else:
+        score += .4
+        score += math.log(uni_count+1)
+        score -= math.log(self.total + self.vocabSize)
+      last_token = token
+    return score
